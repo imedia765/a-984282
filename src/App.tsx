@@ -25,14 +25,23 @@ function App() {
         if (error) throw error;
         
         if (mounted) {
-          console.log('Initial session check:', session?.user?.id);
+          if (session?.user) {
+            console.log('Initial session check:', session.user.id);
+            // Verify the session is still valid
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            if (userError) throw userError;
+            
+            if (!user) {
+              throw new Error('User not found');
+            }
+          }
           setSession(session);
           setLoading(false);
         }
       } catch (error: any) {
         console.error('Session check error:', error);
         if (mounted) {
-          handleAuthError(error);
+          await handleAuthError(error);
           setLoading(false);
         }
       }
@@ -65,7 +74,22 @@ function App() {
         return;
       }
 
-      setSession(session);
+      // For all other events, update the session
+      try {
+        if (session?.user) {
+          // Verify the session is still valid
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          if (userError) throw userError;
+          
+          if (!user) {
+            throw new Error('User not found');
+          }
+        }
+        setSession(session);
+      } catch (error) {
+        console.error('Session verification error:', error);
+        await handleAuthError(error);
+      }
       
       if (!session) {
         // Clear all queries when the user logs out
@@ -77,7 +101,7 @@ function App() {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [queryClient]);
+  }, [queryClient, toast]);
 
   const handleAuthError = async (error: any) => {
     console.error('Auth error:', error);
@@ -125,11 +149,7 @@ function App() {
           <Route
             path="/"
             element={
-              loading ? (
-                <div className="flex items-center justify-center min-h-screen">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                </div>
-              ) : session ? (
+              session ? (
                 <Index />
               ) : (
                 <Navigate to="/login" replace />
@@ -139,11 +159,7 @@ function App() {
           <Route
             path="/login"
             element={
-              loading ? (
-                <div className="flex items-center justify-center min-h-screen">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                </div>
-              ) : session ? (
+              session ? (
                 <Navigate to="/" replace />
               ) : (
                 <Login />
