@@ -16,21 +16,36 @@ function App() {
   const { toast } = useToast();
 
   useEffect(() => {
+    let mounted = true;
+
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      console.log('Initial session check:', session?.user?.id);
-      if (error) {
+    const initializeSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        
+        if (mounted) {
+          console.log('Initial session check:', session?.user?.id);
+          setSession(session);
+          setLoading(false);
+        }
+      } catch (error: any) {
         console.error('Session check error:', error);
-        handleAuthError(error);
+        if (mounted) {
+          handleAuthError(error);
+          setLoading(false);
+        }
       }
-      setSession(session);
-      setLoading(false);
-    });
+    };
+
+    initializeSession();
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!mounted) return;
+      
       console.log('Auth state changed:', _event, session?.user?.id);
       
       if (_event === 'TOKEN_REFRESHED') {
@@ -39,9 +54,15 @@ function App() {
 
       if (_event === 'SIGNED_OUT') {
         console.log('User signed out, clearing session and queries');
-        await handleSignOut();
-        window.location.href = '/login'; // Force a full page reload and redirect
-        return; // Exit early to prevent further state updates
+        // Clear session immediately
+        setSession(null);
+        // Reset all queries
+        await queryClient.resetQueries();
+        // Clear supabase session
+        await supabase.auth.signOut();
+        // Force a full page reload to clear any remaining state
+        window.location.href = '/login';
+        return;
       }
 
       setSession(session);
@@ -53,7 +74,7 @@ function App() {
     });
 
     return () => {
-      console.log('Cleaning up auth subscription');
+      mounted = false;
       subscription.unsubscribe();
     };
   }, [queryClient]);
@@ -62,26 +83,27 @@ function App() {
     console.error('Auth error:', error);
     
     if (error.message?.includes('refresh_token_not_found') || 
-        error.message?.includes('Invalid Refresh Token')) {
-      console.log('Invalid refresh token, signing out...');
-      await handleSignOut();
+        error.message?.includes('Invalid Refresh Token') ||
+        error.message?.includes('session_not_found')) {
+      console.log('Invalid session, signing out...');
+      
+      // Clear session state immediately
+      setSession(null);
+      
+      // Reset all queries
+      await queryClient.resetQueries();
+      
+      // Clear supabase session
+      await supabase.auth.signOut();
       
       toast({
         title: "Session expired",
         description: "Please sign in again",
         variant: "destructive",
       });
-    }
-  };
 
-  const handleSignOut = async () => {
-    try {
-      setSession(null); // Clear session state immediately
-      await queryClient.resetQueries(); // Reset all queries
-      await supabase.auth.signOut(); // Sign out from Supabase
-      console.log('Sign out complete, queries reset');
-    } catch (error) {
-      console.error('Error during sign out:', error);
+      // Force a full page reload to clear any remaining state
+      window.location.href = '/login';
     }
   };
 
