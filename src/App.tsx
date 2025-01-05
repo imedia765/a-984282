@@ -52,8 +52,8 @@ function App() {
         console.log('Token refreshed successfully');
       }
 
-      if (_event === 'SIGNED_OUT') {
-        console.log('User signed out, clearing session and queries');
+      if (_event === 'SIGNED_OUT' || _event === 'USER_DELETED') {
+        console.log('User signed out or deleted, clearing session and queries');
         // Clear session immediately
         setSession(null);
         // Reset all queries
@@ -82,10 +82,13 @@ function App() {
   const handleAuthError = async (error: any) => {
     console.error('Auth error:', error);
     
-    if (error.message?.includes('refresh_token_not_found') || 
-        error.message?.includes('Invalid Refresh Token') ||
-        error.message?.includes('session_not_found')) {
-      console.log('Invalid session, signing out...');
+    const errorMessage = typeof error === 'string' ? error : error.message || error.error_description;
+    
+    if (errorMessage?.includes('session_not_found') || 
+        errorMessage?.includes('JWT expired') ||
+        errorMessage?.includes('Invalid Refresh Token') ||
+        errorMessage?.includes('refresh_token_not_found')) {
+      console.log('Invalid or expired session, signing out...');
       
       // Clear session state immediately
       setSession(null);
