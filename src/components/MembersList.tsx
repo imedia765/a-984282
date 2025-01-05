@@ -7,6 +7,10 @@ import CollectorPaymentSummary from './CollectorPaymentSummary';
 import MemberCard from './members/MemberCard';
 import PaymentDialog from './members/PaymentDialog';
 import { Member } from '@/types/member';
+import { Button } from "@/components/ui/button";
+import { Printer } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { generateMembersPDF } from '@/utils/pdfGenerator';
 
 interface MembersListProps {
   searchTerm: string;
@@ -15,6 +19,7 @@ interface MembersListProps {
 
 const MembersList = ({ searchTerm, userRole }: MembersListProps) => {
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const { data: collectorInfo } = useQuery({
     queryKey: ['collector-info'],
@@ -78,8 +83,47 @@ const MembersList = ({ searchTerm, userRole }: MembersListProps) => {
 
   const selectedMember = members?.find(m => m.id === selectedMemberId);
 
+  const handlePrintMembers = () => {
+    if (!members?.length || !collectorInfo?.name) {
+      toast({
+        title: "Error",
+        description: "No members available to print",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const doc = generateMembersPDF(members, `Members List - Collector: ${collectorInfo.name}`);
+      doc.save();
+      toast({
+        title: "Success",
+        description: "PDF report generated successfully",
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate PDF report",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {userRole === 'collector' && members && members.length > 0 && (
+        <div className="flex justify-end mb-4">
+          <Button
+            onClick={handlePrintMembers}
+            className="flex items-center gap-2 bg-dashboard-accent1 hover:bg-dashboard-accent1/80"
+          >
+            <Printer className="w-4 h-4" />
+            Print Members List
+          </Button>
+        </div>
+      )}
+
       <ScrollArea className="h-[600px] w-full rounded-md">
         <Accordion type="single" collapsible className="space-y-4">
           {members?.map((member) => (
