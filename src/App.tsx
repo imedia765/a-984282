@@ -66,15 +66,34 @@ function App() {
         // Clear session immediately
         setSession(null);
         // Reset all queries
-        await queryClient.resetQueries();
-        // Clear supabase session
-        await supabase.auth.signOut();
-        // Force a full page reload to clear any remaining state
+        queryClient.resetQueries();
+        // Clear local storage
+        localStorage.clear();
+        // Force navigation to login
         window.location.href = '/login';
         return;
       }
 
-      // For all other events, update the session
+      if (_event === 'SIGNED_IN') {
+        // Ensure we have a valid user before setting the session
+        try {
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          if (userError) throw userError;
+          
+          if (!user) {
+            throw new Error('User not found');
+          }
+          setSession(session);
+          // Reset queries to fetch fresh data
+          queryClient.resetQueries();
+        } catch (error) {
+          console.error('Sign in verification error:', error);
+          await handleAuthError(error);
+        }
+        return;
+      }
+
+      // For all other events, update the session if valid
       try {
         if (session?.user) {
           // Verify the session is still valid
@@ -89,11 +108,6 @@ function App() {
       } catch (error) {
         console.error('Session verification error:', error);
         await handleAuthError(error);
-      }
-      
-      if (!session) {
-        // Clear all queries when the user logs out
-        await queryClient.resetQueries();
       }
     });
 
@@ -120,6 +134,9 @@ function App() {
       // Reset all queries
       await queryClient.resetQueries();
       
+      // Clear local storage
+      localStorage.clear();
+      
       // Clear supabase session
       await supabase.auth.signOut();
       
@@ -129,7 +146,7 @@ function App() {
         variant: "destructive",
       });
 
-      // Force a full page reload to clear any remaining state
+      // Force navigation to login
       window.location.href = '/login';
     }
   };
