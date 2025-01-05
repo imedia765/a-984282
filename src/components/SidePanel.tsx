@@ -18,26 +18,22 @@ const SidePanel = ({ onTabChange, userRole }: SidePanelProps) => {
 
   const handleLogout = async () => {
     try {
-      // First invalidate all queries
+      // First invalidate and reset queries
       await queryClient.invalidateQueries();
-      
-      // Clear all cached data
       await queryClient.resetQueries();
       
       // Sign out from Supabase
-      const { error } = await supabase.auth.signOut({
-        scope: 'local'  // Changed to local scope to prevent session issues
-      });
+      const { error } = await supabase.auth.signOut();
       
       if (error) throw error;
 
+      // Show success message
       toast({
         title: "Logged out successfully",
         description: "You have been logged out of your account",
       });
 
-      // Navigate after successful logout
-      navigate('/login', { replace: true });
+      // Let the auth state change handler in App.tsx handle the redirect
     } catch (error: any) {
       console.error('Logout error:', error);
       toast({
