@@ -18,21 +18,31 @@ const SidePanel = ({ onTabChange, userRole }: SidePanelProps) => {
 
   const handleLogout = async () => {
     try {
+      // First invalidate all queries
       await queryClient.invalidateQueries();
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
       
+      // Clear all cached data
+      await queryClient.resetQueries();
+      
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut({
+        scope: 'local'  // Changed to local scope to prevent session issues
+      });
+      
+      if (error) throw error;
+
       toast({
         title: "Logged out successfully",
         description: "You have been logged out of your account",
       });
-      
-      navigate('/login');
+
+      // Navigate after successful logout
+      navigate('/login', { replace: true });
     } catch (error: any) {
       console.error('Logout error:', error);
       toast({
         title: "Logout failed",
-        description: error.message,
+        description: error.message || "Failed to log out",
         variant: "destructive",
       });
     }
