@@ -122,11 +122,7 @@ function App() {
           <Route
             path="/"
             element={
-              loading ? (
-                <div className="flex items-center justify-center min-h-screen">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                </div>
-              ) : session ? (
+              session ? (
                 <Index />
               ) : (
                 <Navigate to="/login" replace />
@@ -136,11 +132,7 @@ function App() {
           <Route
             path="/login"
             element={
-              loading ? (
-                <div className="flex items-center justify-center min-h-screen">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                </div>
-              ) : session ? (
+              session ? (
                 <Navigate to="/" replace />
               ) : (
                 <Login />
