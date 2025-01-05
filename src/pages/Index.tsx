@@ -9,7 +9,7 @@ import SidePanel from '@/components/SidePanel';
 import { useRoleAccess } from '@/hooks/useRoleAccess';
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from '@tanstack/react-query';
-import { Menu, LogOut } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
@@ -46,28 +46,6 @@ const Index = () => {
         variant: "destructive",
       });
       navigate('/login');
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await queryClient.invalidateQueries();
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
-      toast({
-        title: "Logged out successfully",
-        description: "You have been logged out of your account",
-      });
-      
-      navigate('/login');
-    } catch (error: any) {
-      console.error('Logout error:', error);
-      toast({
-        title: "Logout failed",
-        description: error.message,
-        variant: "destructive",
-      });
     }
   };
 
@@ -124,7 +102,6 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-dashboard-dark flex flex-col">
       <div className="w-full bg-dashboard-card/50 py-4 flex justify-between items-center px-6 border-b border-white/10">
-        {/* Mobile Menu Button - Moved inside header */}
         <div className="lg:hidden">
           <Button
             variant="outline"
@@ -140,18 +117,9 @@ const Index = () => {
           <p className="text-xl text-white font-arabic">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
           <p className="text-sm text-dashboard-accent1 mt-1">In the name of Allah, the Most Gracious, the Most Merciful</p>
         </div>
-        <Button
-          variant="ghost"
-          onClick={handleLogout}
-          className="text-dashboard-accent1 hover:text-white hover:bg-dashboard-card flex items-center gap-2"
-        >
-          <LogOut className="w-4 h-4" />
-          Logout
-        </Button>
       </div>
       
       <div className="flex flex-1 relative">
-        {/* Backdrop for mobile */}
         {isSidebarOpen && (
           <div 
             className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -159,7 +127,6 @@ const Index = () => {
           />
         )}
 
-        {/* Sidebar */}
         <div className={`
           fixed lg:relative inset-y-0 left-0 z-40 h-[calc(100vh-4rem)]
           transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -174,7 +141,6 @@ const Index = () => {
           />
         </div>
 
-        {/* Main Content */}
         <div className="flex-1 overflow-auto p-8">
           {renderContent()}
         </div>

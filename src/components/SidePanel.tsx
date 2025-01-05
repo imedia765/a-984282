@@ -1,6 +1,10 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LayoutDashboard, Settings, Users, UserCheck, History } from "lucide-react";
+import { LayoutDashboard, Settings, Users, UserCheck, History, LogOut } from "lucide-react";
 import { UserRole } from "@/hooks/useRoleAccess";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from '@tanstack/react-query';
 
 interface SidePanelProps {
   onTabChange: (value: string) => void;
@@ -8,6 +12,32 @@ interface SidePanelProps {
 }
 
 const SidePanel = ({ onTabChange, userRole }: SidePanelProps) => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const handleLogout = async () => {
+    try {
+      await queryClient.invalidateQueries();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account",
+      });
+      
+      navigate('/login');
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      toast({
+        title: "Logout failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const getTabs = () => {
     const tabs = [
       {
@@ -49,8 +79,8 @@ const SidePanel = ({ onTabChange, userRole }: SidePanelProps) => {
   };
 
   return (
-    <div className="h-screen w-64 glass-card border-r border-white/10">
-      <div className="p-6">
+    <div className="h-screen w-64 glass-card border-r border-white/10 flex flex-col">
+      <div className="p-6 flex-1">
         <h2 className="text-xl font-medium mb-6">Navigation</h2>
         <Tabs 
           defaultValue="dashboard" 
@@ -71,6 +101,15 @@ const SidePanel = ({ onTabChange, userRole }: SidePanelProps) => {
             ))}
           </TabsList>
         </Tabs>
+      </div>
+      <div className="p-6 border-t border-white/10">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-2 px-3 py-2 text-dashboard-accent1 hover:text-white hover:bg-dashboard-card rounded-md transition-colors"
+        >
+          <LogOut className="w-4 h-4" />
+          Logout
+        </button>
       </div>
     </div>
   );
