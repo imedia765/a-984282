@@ -52,8 +52,8 @@ function App() {
         console.log('Token refreshed successfully');
       }
 
-      if (_event === 'SIGNED_OUT' || _event === 'USER_DELETED') {
-        console.log('User signed out or deleted, clearing session and queries');
+      if (_event === 'SIGNED_OUT') {
+        console.log('User signed out, clearing session and queries');
         // Clear session immediately
         setSession(null);
         // Reset all queries
