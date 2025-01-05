@@ -183,6 +183,17 @@ function App() {
               )
             }
           />
+          {/* Add a catch-all route that redirects to the appropriate page */}
+          <Route
+            path="*"
+            element={
+              session ? (
+                <Navigate to="/" replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
         </Routes>
         <Toaster />
       </BrowserRouter>
