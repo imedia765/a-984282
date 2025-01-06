@@ -39,15 +39,15 @@ const PaymentCard = ({
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-dashboard-accent3/20 text-dashboard-accent3';
+        return 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
       case 'due':
-        return 'bg-dashboard-warning/20 text-dashboard-warning';
+        return 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
       case 'overdue':
-        return 'bg-red-500/20 text-red-400';
+        return 'bg-rose-500/20 text-rose-400 border border-rose-500/30';
       case 'pending':
-        return 'bg-dashboard-warning/20 text-dashboard-warning';
+        return 'bg-blue-500/20 text-blue-400 border border-blue-500/30';
       default:
-        return 'bg-dashboard-warning/20 text-dashboard-warning';
+        return 'bg-blue-500/20 text-blue-400 border border-blue-500/30';
     }
   };
 
@@ -70,7 +70,7 @@ const PaymentCard = ({
     <Card className="dashboard-card">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Annual Payment Section */}
-        <div className="p-6 glass-card rounded-lg">
+        <div className="p-6 glass-card rounded-lg border border-white/10 hover:border-white/20 transition-colors">
           <h3 className="text-lg font-medium text-white mb-4">Annual Payment</h3>
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -84,18 +84,18 @@ const PaymentCard = ({
                     Last payment: {formatDate(lastAnnualPaymentDate)}
                   </p>
                   {lastAnnualPaymentAmount && (
-                    <p className="text-xs text-dashboard-accent3">
+                    <p className="text-xs text-emerald-400">
                       Amount: £{lastAnnualPaymentAmount}
                     </p>
                   )}
                 </div>
               )}
             </div>
-            <div className="flex items-center">
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(annualPaymentStatus)}`}>
+            <div className="flex items-center space-x-3">
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium shadow-lg backdrop-blur-sm ${getStatusColor(annualPaymentStatus)}`}>
                 {annualPaymentStatus}
               </span>
-              <div className="w-16 h-16 ml-2" style={{ color: getStatusColor(annualPaymentStatus).split(' ')[1].replace('text-', '') }}>
+              <div className="w-12 h-12" style={{ color: getStatusColor(annualPaymentStatus).split(' ')[1].replace('text-', '') }}>
                 {getStatusIcon(annualPaymentStatus)}
               </div>
             </div>
@@ -117,7 +117,7 @@ const PaymentCard = ({
         </div>
 
         {/* Emergency Collection Section */}
-        <div className="p-6 glass-card rounded-lg">
+        <div className="p-6 glass-card rounded-lg border border-white/10 hover:border-white/20 transition-colors">
           <h3 className="text-lg font-medium text-white mb-4">Emergency Collection</h3>
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -133,18 +133,18 @@ const PaymentCard = ({
                     Last payment: {formatDate(lastEmergencyPaymentDate)}
                   </p>
                   {lastEmergencyPaymentAmount && (
-                    <p className="text-xs text-dashboard-accent3">
+                    <p className="text-xs text-emerald-400">
                       Amount: £{lastEmergencyPaymentAmount}
                     </p>
                   )}
                 </div>
               )}
             </div>
-            <div className="flex items-center">
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(emergencyCollectionStatus)}`}>
+            <div className="flex items-center space-x-3">
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium shadow-lg backdrop-blur-sm ${getStatusColor(emergencyCollectionStatus)}`}>
                 {emergencyCollectionStatus}
               </span>
-              <div className="w-16 h-16 ml-2" style={{ color: getStatusColor(emergencyCollectionStatus).split(' ')[1].replace('text-', '') }}>
+              <div className="w-12 h-12" style={{ color: getStatusColor(emergencyCollectionStatus).split(' ')[1].replace('text-', '') }}>
                 {getStatusIcon(emergencyCollectionStatus)}
               </div>
             </div>
