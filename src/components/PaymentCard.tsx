@@ -39,15 +39,15 @@ const PaymentCard = ({
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return '#0EA5E9'; // Ocean Blue for paid
+        return 'bg-dashboard-accent3/20 text-dashboard-accent3';
       case 'due':
-        return '#F97316'; // Bright Orange for due
+        return 'bg-dashboard-warning/20 text-dashboard-warning';
       case 'overdue':
-        return '#ea384c'; // Red for overdue
+        return 'bg-red-500/20 text-red-400';
       case 'pending':
-        return '#8B5CF6'; // Purple for pending
+        return 'bg-dashboard-warning/20 text-dashboard-warning';
       default:
-        return '#8B5CF6';
+        return 'bg-dashboard-warning/20 text-dashboard-warning';
     }
   };
 
@@ -75,7 +75,7 @@ const PaymentCard = ({
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-2xl font-bold text-white">£40</p>
-              <p className="text-sm font-bold" style={{ color: getStatusColor(annualPaymentStatus) }}>
+              <p className="text-sm font-bold" style={{ color: getStatusColor(annualPaymentStatus).split(' ')[1].replace('text-', '') }}>
                 Due: {formatDate(annualPaymentDueDate)}
               </p>
               {lastAnnualPaymentDate && (
@@ -91,8 +91,13 @@ const PaymentCard = ({
                 </div>
               )}
             </div>
-            <div className="w-16 h-16" style={{ color: getStatusColor(annualPaymentStatus) }}>
-              {getStatusIcon(annualPaymentStatus)}
+            <div className="flex items-center">
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(annualPaymentStatus)}`}>
+                {annualPaymentStatus}
+              </span>
+              <div className="w-16 h-16 ml-2" style={{ color: getStatusColor(annualPaymentStatus).split(' ')[1].replace('text-', '') }}>
+                {getStatusIcon(annualPaymentStatus)}
+              </div>
             </div>
           </div>
           <div className="text-sm text-dashboard-text">
@@ -119,7 +124,7 @@ const PaymentCard = ({
               <p className="text-2xl font-bold text-white">
                 £{emergencyCollectionAmount}
               </p>
-              <p className="text-sm font-bold" style={{ color: getStatusColor(emergencyCollectionStatus) }}>
+              <p className="text-sm font-bold" style={{ color: getStatusColor(emergencyCollectionStatus).split(' ')[1].replace('text-', '') }}>
                 Due: {formatDate(emergencyCollectionDueDate)}
               </p>
               {lastEmergencyPaymentDate && (
@@ -135,8 +140,13 @@ const PaymentCard = ({
                 </div>
               )}
             </div>
-            <div className="w-16 h-16" style={{ color: getStatusColor(emergencyCollectionStatus) }}>
-              {getStatusIcon(emergencyCollectionStatus)}
+            <div className="flex items-center">
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(emergencyCollectionStatus)}`}>
+                {emergencyCollectionStatus}
+              </span>
+              <div className="w-16 h-16 ml-2" style={{ color: getStatusColor(emergencyCollectionStatus).split(' ')[1].replace('text-', '') }}>
+                {getStatusIcon(emergencyCollectionStatus)}
+              </div>
             </div>
           </div>
           <div className="text-sm text-dashboard-text">
