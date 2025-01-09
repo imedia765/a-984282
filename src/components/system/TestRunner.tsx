@@ -20,20 +20,27 @@ const TestRunner = () => {
       setProgress(0);
       setCurrentTest('Initializing tests...');
 
-      const { data, error } = await supabase.functions.invoke('run-tests', {
-        body: { command: 'test' }
-      });
+      try {
+        const { data, error } = await supabase.functions.invoke('run-tests', {
+          body: { command: 'test' }
+        });
 
-      if (error) throw error;
-      return data;
+        if (error) throw error;
+        
+        // Add success message to logs
+        setTestLogs(prev => [...prev, 'Tests completed successfully']);
+        setProgress(100);
+        setCurrentTest('All tests complete');
+        
+        return data;
+      } catch (error) {
+        console.error('Test run error:', error);
+        setTestLogs(prev => [...prev, `Error running tests: ${error.message}`]);
+        throw error;
+      }
     },
-    onSuccess: (data) => {
-      setTestLogs(prev => [...prev, 'Tests completed successfully']);
-      setProgress(100);
-      setCurrentTest('All tests complete');
-    },
-    onError: (error) => {
-      setTestLogs(prev => [...prev, `Error running tests: ${error.message}`]);
+    onError: (error: Error) => {
+      setTestLogs(prev => [...prev, `Error: ${error.message}`]);
       setProgress(0);
       setCurrentTest('Test run failed');
     },
@@ -49,6 +56,7 @@ const TestRunner = () => {
       const channel = supabase
         .channel('test-logs')
         .on('broadcast', { event: 'test-log' }, ({ payload }) => {
+          console.log('Received test log:', payload);
           setTestLogs(prev => [...prev, payload.message]);
           setProgress(payload.progress || progress);
           setCurrentTest(payload.currentTest || currentTest);
@@ -74,7 +82,7 @@ const TestRunner = () => {
           disabled={isRunning}
           className="bg-dashboard-accent1 hover:bg-dashboard-accent2 text-white"
         >
-          Run Tests
+          {isRunning ? 'Running...' : 'Run Tests'}
         </Button>
       </div>
 
@@ -97,7 +105,7 @@ const TestRunner = () => {
         </Alert>
       )}
 
-      <DebugConsole logs={testLogs} />
+      {testLogs.length > 0 && <DebugConsole logs={testLogs} />}
     </section>
   );
 };
