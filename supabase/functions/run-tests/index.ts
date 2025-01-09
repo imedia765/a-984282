@@ -1,12 +1,25 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+// Define CORS headers
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders })
+  }
+
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     )
+
+    console.log('Starting test execution...')
 
     // Broadcast initial status
     await supabaseClient
@@ -34,6 +47,8 @@ serve(async (req) => {
       // Add a small delay to simulate test execution
       await new Promise(resolve => setTimeout(resolve, 1000))
 
+      console.log(`Executing step: ${step.message}`)
+
       await supabaseClient
         .channel('test-logs')
         .send({
@@ -55,17 +70,28 @@ serve(async (req) => {
       coverage: '85%'
     }
 
+    // Return response with CORS headers
     return new Response(
       JSON.stringify(testResults),
-      { headers: { 'Content-Type': 'application/json' } }
+      { 
+        headers: { 
+          'Content-Type': 'application/json',
+          ...corsHeaders 
+        } 
+      }
     )
   } catch (error) {
     console.error('Error running tests:', error)
+    
+    // Return error response with CORS headers
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          ...corsHeaders 
+        }
       }
     )
   }
