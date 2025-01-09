@@ -6,17 +6,19 @@ import { PlayCircle, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { DebugConsole } from '../logs/DebugConsole';
 import SystemCheckProgress from './SystemCheckProgress';
+import { toast } from "sonner";
 
 const TestRunner = () => {
-  const [testLogs, setTestLogs] = useState<string[]>(['Test runner initialized']);
+  const [testLogs, setTestLogs] = useState<string[]>(['Test runner initialized and ready']);
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentTest, setCurrentTest] = useState('');
+  const [hasRun, setHasRun] = useState(false);
 
   const runTestsMutation = useMutation({
     mutationFn: async () => {
       setIsRunning(true);
-      setTestLogs(prev => [...prev, 'Starting test run...']);
+      setTestLogs(prev => [...prev, '🚀 Starting test run...']);
       setProgress(0);
       setCurrentTest('Initializing tests...');
 
@@ -28,26 +30,31 @@ const TestRunner = () => {
 
         if (error) {
           console.error('Function invocation error:', error);
+          setTestLogs(prev => [...prev, `❌ Error: ${error.message}`]);
           throw error;
         }
         
         console.log('Test run completed:', data);
-        setTestLogs(prev => [...prev, 'Tests completed successfully']);
+        setTestLogs(prev => [...prev, '✅ Tests completed successfully', `📊 Coverage: ${data.coverage}`]);
         setProgress(100);
         setCurrentTest('All tests complete');
+        setHasRun(true);
+        toast.success("Test run completed successfully");
         
         return data;
       } catch (error) {
         console.error('Test run error:', error);
-        setTestLogs(prev => [...prev, `Error running tests: ${error.message}`]);
+        setTestLogs(prev => [...prev, `❌ Error running tests: ${error.message}`]);
+        toast.error("Test run failed");
         throw error;
       }
     },
     onError: (error: Error) => {
       console.error('Mutation error:', error);
-      setTestLogs(prev => [...prev, `Error: ${error.message}`]);
+      setTestLogs(prev => [...prev, `❌ Error: ${error.message}`]);
       setProgress(0);
       setCurrentTest('Test run failed');
+      setHasRun(true);
     },
     onSettled: () => {
       setIsRunning(false);
@@ -64,7 +71,7 @@ const TestRunner = () => {
         .on('broadcast', { event: 'test-log' }, ({ payload }) => {
           console.log('Received test log:', payload);
           if (payload?.message) {
-            setTestLogs(prev => [...prev, payload.message]);
+            setTestLogs(prev => [...prev, `📝 ${payload.message}`]);
           }
           if (payload?.progress) {
             setProgress(payload.progress);
@@ -75,6 +82,7 @@ const TestRunner = () => {
         })
         .subscribe((status) => {
           console.log('Channel status:', status);
+          setTestLogs(prev => [...prev, `📡 Channel status: ${status}`]);
         });
 
       return () => {
