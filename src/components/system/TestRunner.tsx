@@ -8,7 +8,7 @@ import { DebugConsole } from '../logs/DebugConsole';
 import SystemCheckProgress from './SystemCheckProgress';
 
 const TestRunner = () => {
-  const [testLogs, setTestLogs] = useState<string[]>([]);
+  const [testLogs, setTestLogs] = useState<string[]>(['Test runner initialized']);
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentTest, setCurrentTest] = useState('');
@@ -16,18 +16,22 @@ const TestRunner = () => {
   const runTestsMutation = useMutation({
     mutationFn: async () => {
       setIsRunning(true);
-      setTestLogs(['Starting test run...']);
+      setTestLogs(prev => [...prev, 'Starting test run...']);
       setProgress(0);
       setCurrentTest('Initializing tests...');
 
       try {
+        console.log('Invoking run-tests function...');
         const { data, error } = await supabase.functions.invoke('run-tests', {
           body: { command: 'test' }
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Function invocation error:', error);
+          throw error;
+        }
         
-        // Add success message to logs
+        console.log('Test run completed:', data);
         setTestLogs(prev => [...prev, 'Tests completed successfully']);
         setProgress(100);
         setCurrentTest('All tests complete');
@@ -40,6 +44,7 @@ const TestRunner = () => {
       }
     },
     onError: (error: Error) => {
+      console.error('Mutation error:', error);
       setTestLogs(prev => [...prev, `Error: ${error.message}`]);
       setProgress(0);
       setCurrentTest('Test run failed');
@@ -53,17 +58,27 @@ const TestRunner = () => {
   useQuery({
     queryKey: ['test-logs'],
     queryFn: async () => {
+      console.log('Setting up realtime subscription...');
       const channel = supabase
         .channel('test-logs')
         .on('broadcast', { event: 'test-log' }, ({ payload }) => {
           console.log('Received test log:', payload);
-          setTestLogs(prev => [...prev, payload.message]);
-          setProgress(payload.progress || progress);
-          setCurrentTest(payload.currentTest || currentTest);
+          if (payload?.message) {
+            setTestLogs(prev => [...prev, payload.message]);
+          }
+          if (payload?.progress) {
+            setProgress(payload.progress);
+          }
+          if (payload?.currentTest) {
+            setCurrentTest(payload.currentTest);
+          }
         })
-        .subscribe();
+        .subscribe((status) => {
+          console.log('Channel status:', status);
+        });
 
       return () => {
+        console.log('Cleaning up channel subscription');
         channel.unsubscribe();
       };
     },
@@ -82,7 +97,7 @@ const TestRunner = () => {
           disabled={isRunning}
           className="bg-dashboard-accent1 hover:bg-dashboard-accent2 text-white"
         >
-          {isRunning ? 'Running...' : 'Run Tests'}
+          {isRunning ? 'Running Tests...' : 'Run Tests'}
         </Button>
       </div>
 
@@ -105,7 +120,7 @@ const TestRunner = () => {
         </Alert>
       )}
 
-      {testLogs.length > 0 && <DebugConsole logs={testLogs} />}
+      <DebugConsole logs={testLogs} />
     </section>
   );
 };
