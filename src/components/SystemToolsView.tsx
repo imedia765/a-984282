@@ -65,7 +65,7 @@ const SystemToolsView = () => {
         <GitOperationsCard />
         <RoleManagementCard />
         
-        <Card className="p-6">
+        <Card className="dashboard-card">
           <LogsHeader 
             title="System Logs"
             subtitle="View and manage system audit and monitoring logs"

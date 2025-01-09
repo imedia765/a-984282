@@ -63,15 +63,16 @@ const TestRunner = () => {
   });
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-4 dashboard-card">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-medium text-white flex items-center gap-2">
-          <PlayCircle className="w-5 h-5" />
+        <h2 className="text-xl font-medium text-dashboard-text flex items-center gap-2">
+          <PlayCircle className="w-5 h-5 text-dashboard-accent1" />
           Test Runner
         </h2>
         <Button
           onClick={() => runTestsMutation.mutate()}
           disabled={isRunning}
+          className="bg-dashboard-accent1 hover:bg-dashboard-accent2 text-white"
         >
           Run Tests
         </Button>
@@ -87,7 +88,7 @@ const TestRunner = () => {
       )}
 
       {runTestsMutation.isError && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="bg-dashboard-card border-dashboard-error">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>
