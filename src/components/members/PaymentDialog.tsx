@@ -111,14 +111,14 @@ const PaymentDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-dashboard-card border-white/10">
+      <DialogContent className="bg-dashboard-card border-white/10 w-[95%] max-w-md mx-auto max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-semibold text-dashboard-highlight">
+          <DialogTitle className="text-xl sm:text-2xl font-semibold text-dashboard-highlight">
             Make Payment
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           <PaymentTypeSelector
             selectedPaymentType={selectedPaymentType}
             onPaymentTypeChange={setSelectedPaymentType}
@@ -133,7 +133,7 @@ const PaymentDialog = ({
             <BankDetails memberNumber={memberNumber} />
           )}
 
-          <div className="text-lg font-semibold text-dashboard-highlight">
+          <div className="text-base sm:text-lg font-semibold text-dashboard-highlight">
             Amount: £{selectedPaymentType === 'yearly' ? '40.00' : '20.00'}
           </div>
 
