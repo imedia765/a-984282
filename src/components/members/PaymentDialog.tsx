@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { Phone, User } from "lucide-react";
 
 interface PaymentDialogProps {
   isOpen: boolean;
@@ -119,6 +120,25 @@ const PaymentDialog = ({
         </DialogHeader>
 
         <div className="space-y-4 sm:space-y-6">
+          {/* Collector Information */}
+          {collectorInfo && (
+            <div className="p-4 bg-blue-50 rounded-lg space-y-3">
+              <h3 className="text-lg font-medium text-blue-900">Your Collector</h3>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-blue-700">
+                  <User className="w-4 h-4" />
+                  <span>{collectorInfo.name}</span>
+                </div>
+                {collectorInfo.phone && (
+                  <div className="flex items-center gap-2 text-blue-700">
+                    <Phone className="w-4 h-4" />
+                    <span>{collectorInfo.phone}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <PaymentTypeSelector
             selectedPaymentType={selectedPaymentType}
             onPaymentTypeChange={setSelectedPaymentType}
@@ -140,8 +160,9 @@ const PaymentDialog = ({
           <Button 
             onClick={handleSubmit}
             className="w-full bg-dashboard-accent1 hover:bg-dashboard-accent1/90"
+            disabled={true}
           >
-            Submit Payment
+            Please Contact Your Collector
           </Button>
         </div>
 
