@@ -1,17 +1,20 @@
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
 import { expect, afterEach, vi } from 'vitest';
+import { render } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { ReactElement } from 'react';
 
 // Setup a basic DOM environment for tests
-import { JSDOM } from 'jsdom';
-
 const dom = new JSDOM('<!doctype html><html><body></body></html>', {
   url: 'http://localhost:3000',
   pretendToBeVisual: true,
   resources: 'usable'
 });
 
-global.window = dom.window;
+// Properly type the window object
+const customWindow = dom.window as unknown as Window & typeof globalThis;
+global.window = customWindow;
 global.document = dom.window.document;
 global.navigator = {
   userAgent: 'node.js',
@@ -39,20 +42,26 @@ global.window.matchMedia = vi.fn().mockImplementation(query => ({
   dispatchEvent: vi.fn(),
 }));
 
+// Create a wrapper with providers for testing
+export function renderWithProviders(ui: ReactElement) {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
+  return render(
+    <QueryClientProvider client={queryClient}>
+      {ui}
+    </QueryClientProvider>
+  );
+}
+
 // Cleanup after each test case
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
   localStorage.clear();
-});
-
-// Add custom matchers
-expect.extend({
-  toHaveBeenCalledWithMatch(received: any, expected: any) {
-    const pass = this.equals(received.mock.calls[0], [expected]);
-    return {
-      pass,
-      message: () => `expected ${received} to have been called with ${expected}`,
-    };
-  },
 });
