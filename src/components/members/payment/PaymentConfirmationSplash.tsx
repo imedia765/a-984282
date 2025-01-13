@@ -39,12 +39,12 @@ const PaymentConfirmationSplash = ({
 
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${
-      success ? 'bg-green-500/90' : 'bg-red-500/90'
+      success ? 'bg-blue-500/90' : 'bg-red-500/90'
     } animate-fade-in`}>
       <div className="bg-white rounded-lg p-6 max-w-md w-full space-y-4 animate-scale-in">
         <div className="flex justify-center">
           {success ? (
-            <CheckCircle2 className="w-16 h-16 text-green-500" />
+            <CheckCircle2 className="w-16 h-16 text-blue-500" />
           ) : (
             <XCircle className="w-16 h-16 text-red-500" />
           )}
